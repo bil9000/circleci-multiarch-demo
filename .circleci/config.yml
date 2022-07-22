@@ -300,17 +300,6 @@ workflows:
               architecture: ["arm64", "amd64"]
           requires:
             - Testing << matrix.architecture >> Image
-<<<<<<< Updated upstream
-      - push-image:
-          name: "Pushing << matrix.architecture >> Image"
-          matrix:
-            parameters:
-              architecture: ["ppc64le", "s390x"]
-          requires:
-            - "Building << matrix.architecture >> Image"
-=======
-            - "Testing Python Code"
->>>>>>> Stashed changes
       - tagging-image:
           name: "Tagging Images"
           requires:
@@ -324,10 +313,4 @@ workflows:
           name: "Deploying Multi-Arch Container on << matrix.architecture >>"
           matrix:
             parameters:
-<<<<<<< Updated upstream
               architecture: ["s390x", "amd64-deployment", "arm64-deployment"]
-=======
-              architecture: ["amd64-deployment", "arm64-deployment"]
-          requires:
-            - "Approval Needed for Deployment"
->>>>>>> Stashed changes
