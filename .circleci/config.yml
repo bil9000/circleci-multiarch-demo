@@ -57,4 +57,4 @@ workflows:
           name: "Build an x86 container"
       - arm-deploy:
           name: "Deploy an ARM container"
-          requies: "Build an ARM container"
+          requires: arm-build
