@@ -1,6 +1,6 @@
 version: 2.1
 
-orbs: 
+orbs:
   aws-ecr: circleci/aws-ecr@8.1.2
 
 commands:
@@ -39,7 +39,7 @@ commands:
             echo "export GIT_BRANCH=${CIRCLE_BRANCH}" >> $BASH_ENV
             if [ -z ${CIRCLE_PULL_REQUEST+x} ]; then echo "export IS_PULL_REQUEST='false'"; else echo "export IS_PULL_REQUEST='true'"; fi  >> $BASH_ENV
             source $BASH_ENV
-  
+
   save-docker-image:
     description: "Saves a Docker image for future Jobs"
     steps:
@@ -73,6 +73,32 @@ commands:
           name: Build Docker Image
           command: ./.ci/build.sh -f Dockerfile --image ${DOCKER_IMAGE}:${VERSION}-${CIRCLE_SHA1} --build-args "VERSION=${VERSION} CIRCLE_BUILD_URL=${CIRCLE_BUILD_URL} CIRCLE_SHA1=${CIRCLE_SHA1} CIRCLE_USERNAME=${CIRCLE_USERNAME} CIRCLE_BUILD_NUM=${CIRCLE_BUILD_NUM}"
 
+  testing-docker-image:
+    description: "Launches tests against a Docker image"
+    steps:
+      - checkout
+      - run:
+          name: Install goss
+          command: |
+            # rather than give internet scripts SU rights, we install to local user bin and add to path
+            export GOSS_DST=~/bin
+            export PATH=$PATH:~/bin
+            export GOSS_OPTS="--format junit"
+            curl -fsSL https://goss.rocks/install | sh
+            goss -version
+      - run:
+          name: Make Directory for Goss Results
+          command: mkdir goss-results
+      - run:
+          name: Run dgoss Test
+          command: |
+            export GOSS_OPTS="--format junit"
+            dgoss run -p 8080:8080 ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}  > ./goss-results/report.xml
+      - store_test_results:
+          path: goss-results
+      - store_artifacts:
+          path: goss-results
+          
   push:
     description: "Pushes Docker Image to DockerHub via Build Tools"
     steps:
@@ -145,11 +171,11 @@ executors:
 
   amd64-deployment:
     machine: true
-    resource_class: crowley-namespace/multi-arch-amd64 
+    resource_class: crowley-namespace/multi-arch-amd64
 
   arm64-deployment:
     machine: true
-    resource_class: crowley-namespace/multi-arch-arm64 
+    resource_class: crowley-namespace/multi-arch-arm64
 
 jobs:
   test-demo:
@@ -173,7 +199,7 @@ jobs:
       DOCKER_IMAGE: multi-arch-circleci-demo
       DOCKER_NAMESPACE: jimcrowley
       ARCH: amd64
-      
+
   build-image:
     parameters:
       architecture:
