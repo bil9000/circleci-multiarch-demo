@@ -8,7 +8,7 @@ jobs:
   arm-build:
     machine:
       image: ubuntu-2004:current
-    resource_class: arm.medium
+    resource_class: arm.large
     steps:
       - checkout
       - aws-ecr/build-and-push-image:
@@ -19,7 +19,7 @@ jobs:
   x86-build:
     machine:
       image: ubuntu-2004:current
-    resource_class: x86.medium
+    resource_class: x86.large
     steps:
       - checkout
       - aws-ecr/build-and-push-image:
@@ -59,8 +59,16 @@ workflows:
       #- arm-deploy:
       #    name: "Deploy an ARM container"
       - aws-ecs/deploy-service-update:
+          name: "Deploy an ARM container"
           cluster: 'default'
           container-image-name-updates: 'container=${MY_APP_PREFIX}-service,tag=${CIRCLE_SHA1}'
           family: '${MY_APP_PREFIX}-service'
           requires:
             - "Build an ARM container"
+      - aws-ecs/deploy-service-update:
+          name: "Deploy an x86 container"
+          cluster: 'default'
+          container-image-name-updates: 'container=${MY_APP_PREFIX}-service,tag=${CIRCLE_SHA1}'
+          family: '${MY_APP_PREFIX}-service'
+          requires:
+            - "Build an x86 container"
