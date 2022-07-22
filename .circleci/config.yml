@@ -65,32 +65,6 @@ commands:
             name: Loading Docker Image
             command: docker load --input /tmp/docker-images/${DOCKER_NAMESPACE}-${DOCKER_IMAGE}-$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}.tar
 
-  testing-docker-image:
-    description: "Launches tests against a Docker image"
-    steps:
-      - checkout
-      - run:
-          name: Install goss
-          command: |
-            # rather than give internet scripts SU rights, we install to local user bin and add to path
-            export GOSS_DST=~/bin
-            export PATH=$PATH:~/bin
-            export GOSS_OPTS="--format junit"
-            curl -fsSL https://goss.rocks/install | sh
-            goss -version
-      - run:
-          name: Make Directory for Goss Results
-          command: mkdir goss-results
-      - run:
-          name: Run dgoss Test
-          command: |
-            export GOSS_OPTS="--format junit"
-            dgoss run -p 8080:8080 ${DOCKER_NAMESPACE}/${DOCKER_IMAGE}:$(docker version -f {{.Server.Arch}})-${VERSION}-${CIRCLE_SHA1}  > ./goss-results/report.xml
-      - store_test_results:
-          path: goss-results
-      - store_artifacts:
-          path: goss-results
-
   build:
     description: "Build Docker image via Build Tools"
     steps:
