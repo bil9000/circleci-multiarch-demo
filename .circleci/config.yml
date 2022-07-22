@@ -169,14 +169,6 @@ executors:
       docker_layer_caching: true
     resource_class: medium
 
-  ppc64le:
-    machine: true
-    resource_class: crowley-namespace/ppc64le
-
-  s390x:
-    machine: true
-    resource_class: crowley-namespace/s390x
-
   amd64-deployment:
     machine: true
     resource_class: crowley-namespace/multi-arch-amd64 
