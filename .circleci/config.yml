@@ -266,7 +266,7 @@ workflows:
             parameters:
               architecture: ["arm64", "amd64"]
           requires:
-            - Testing << matrix.architecture >> Image
+            - Building << matrix.architecture >> Image
       - tagging-image:
           name: "Tagging Images"
           requires:
