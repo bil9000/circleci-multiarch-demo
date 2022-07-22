@@ -25,7 +25,7 @@ jobs:
       - aws-ecr/build-and-push-image:
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           region: ${AWS_DEFAULT_REGION}
-          tag: "x86,latest"
+          tag: "x86-${CIRCLE_SHA1}"
 
   arm-deploy:
     machine: 
@@ -37,7 +37,7 @@ jobs:
           aws-region: ${AWS_DEFAULT_REGION}
           family: "${AWS_RESOURCE_NAME_PREFIX}-service"
           cluster-name: "${AWS_RESOURCE_NAME_PREFIX}-cluster"
-          container-image-name-updates: "container=${AWS_RESOURCE_NAME_PREFIX}-service,image-and-tag=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${AWS_RESOURCE_NAME_PREFIX}:${CIRCLE_SHA1}"
+          container-image-name-updates: "container=${AWS_RESOURCE_NAME_PREFIX}-service,image-and-tag=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${AWS_RESOURCE_NAME_PREFIX}:arm${CIRCLE_SHA1}"
           verify-revision-is-deployed: true
           post-steps:
             - run:
@@ -47,6 +47,27 @@ jobs:
                   ELB_ARN=$(aws elbv2 describe-target-groups --target-group-arns $TARGET_GROUP_ARN | jq -r '.TargetGroups[0].LoadBalancerArns[0]')
                   ELB_DNS_NAME=$(aws elbv2 describe-load-balancers --load-balancer-arns $ELB_ARN | jq -r '.LoadBalancers[0].DNSName')
                   curl -s --retry 10 http://$ELB_DNS_NAME | grep "Welcome to nginx!"
+  x86-deploy:
+    machine: 
+      image: ubuntu-2004:current
+    resource_class: x86.medium
+    steps:
+      - checkout
+      - aws-ecs/deploy-service-update:
+          aws-region: ${AWS_DEFAULT_REGION}
+          family: "${AWS_RESOURCE_NAME_PREFIX}-service"
+          cluster-name: "${AWS_RESOURCE_NAME_PREFIX}-cluster"
+          container-image-name-updates: "container=${AWS_RESOURCE_NAME_PREFIX}-service,image-and-tag=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${AWS_RESOURCE_NAME_PREFIX}:x86${CIRCLE_SHA1}"
+          verify-revision-is-deployed: true
+          post-steps:
+            - run:
+                name: Test the deployment
+                command: |
+                  TARGET_GROUP_ARN=$(aws ecs describe-services --cluster ${AWS_RESOURCE_NAME_PREFIX}-cluster --services ${AWS_RESOURCE_NAME_PREFIX}-service | jq -r '.services[0].loadBalancers[0].targetGroupArn')
+                  ELB_ARN=$(aws elbv2 describe-target-groups --target-group-arns $TARGET_GROUP_ARN | jq -r '.TargetGroups[0].LoadBalancerArns[0]')
+                  ELB_DNS_NAME=$(aws elbv2 describe-load-balancers --load-balancer-arns $ELB_ARN | jq -r '.LoadBalancers[0].DNSName')
+                  curl -s --retry 10 http://$ELB_DNS_NAME | grep "Welcome to nginx!"
+
 
 workflows:
   version: 2
@@ -60,14 +81,14 @@ workflows:
       #    name: "Deploy an ARM container"
       - aws-ecs/deploy-service-update:
           name: "Deploy an ARM container"
-          cluster: 'default'
+          cluster: "${AWS_RESOURCE_NAME_PREFIX}-cluster"
           container-image-name-updates: 'container=${MY_APP_PREFIX}-service,tag=${CIRCLE_SHA1}'
           family: '${MY_APP_PREFIX}-service'
           requires:
             - "Build an ARM container"
       - aws-ecs/deploy-service-update:
           name: "Deploy an x86 container"
-          cluster: 'default'
+          cluster: "${AWS_RESOURCE_NAME_PREFIX}-cluster"
           container-image-name-updates: 'container=${MY_APP_PREFIX}-service,tag=${CIRCLE_SHA1}'
           family: '${MY_APP_PREFIX}-service'
           requires:
