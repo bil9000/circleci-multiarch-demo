@@ -251,7 +251,7 @@ jobs:
       DOCKER_IMAGE: multi-arch-circleci-demo
       DOCKER_NAMESPACE: jimcrowley
       RELEASE_BRANCH: main
-      SUPPORTED_ARCHITECTURES: "amd64 arm64 ppc64le s390x"
+      SUPPORTED_ARCHITECTURES: "amd64 arm64"
 
   make-manifests:
     executor: amd64
@@ -313,4 +313,4 @@ workflows:
           name: "Deploying Multi-Arch Container on << matrix.architecture >>"
           matrix:
             parameters:
-              architecture: ["s390x", "amd64-deployment", "arm64-deployment"]
+              architecture: ["amd64-deployment", "arm64-deployment"]
