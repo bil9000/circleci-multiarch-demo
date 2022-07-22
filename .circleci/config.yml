@@ -12,7 +12,7 @@ jobs:
       - checkout
       - aws-ecr/build-and-push-image:
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
-          region: ${AWS_DEFAULT_REGION}
+          region: ${AWS_REGION}
           tag: "arm-${CIRCLE_SHA1}"
 
   x86-build:
@@ -23,7 +23,7 @@ jobs:
       - checkout
       - aws-ecr/build-and-push-image:
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
-          region: ${AWS_DEFAULT_REGION}
+          region: ${AWS_REGION}
           tag: "x86-${CIRCLE_SHA1}"
 
 workflows:
