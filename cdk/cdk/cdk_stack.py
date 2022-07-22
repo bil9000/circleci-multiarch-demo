@@ -18,10 +18,10 @@ class CdkStack(Stack):
         cluster = ecs.Cluster(self, "circleci-multiarch-demo", vpc=vpc)
 
         fargate_service = ecs_patterns.NetworkLoadBalancedFargateService(
-            self, "FargateService",
+            self, "circleci-multiarch-demo",
             cluster=cluster,
             task_image_options=ecs_patterns.NetworkLoadBalancedTaskImageOptions(
-                image=ecs.ContainerImage.from_registry("amazon/amazon-ecs-sample")
+                image=ecs.ContainerImage.from_registry("circleci-multiarch-demo")
             )
         )
 
