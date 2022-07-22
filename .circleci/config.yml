@@ -25,7 +25,7 @@ jobs:
       - aws-ecr/build-and-push-image:
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           region: ${AWS_DEFAULT_REGION}
-          tag: "x86-${CIRCLE_SHA1}"
+          tag: "x86,latest"
 
   arm-deploy:
     machine: 
