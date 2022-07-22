@@ -260,13 +260,6 @@ workflows:
           matrix:
             parameters:
               architecture: ["arm64", "amd64"]
-      - test-image:
-          name: "Testing << matrix.architecture >> Image"
-          matrix:
-            parameters:
-              architecture: ["arm64", "amd64"]
-          requires:
-            - "Building << matrix.architecture >> Image"
       - push-image:
           name: "Pushing << matrix.architecture >> Image"
           matrix:
