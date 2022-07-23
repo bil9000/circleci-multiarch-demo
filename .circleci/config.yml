@@ -28,12 +28,6 @@ jobs:
           region: ${AWS_DEFAULT_REGION}
           tag: "x86-${CIRCLE_SHA1}"
           platform: linux/amd64
-
-  x86-deploy:
-    machine:
-      image: ubuntu-2004:current
-    resource_class: x86.large
-    steps:
       - aws-ecs/deploy-service-update:
           aws-region: ${AWS_DEFAULT_REGION}
           family: "${AWS_RESOURCE_NAME_PREFIX}-service"
@@ -55,6 +49,3 @@ workflows:
     jobs:
       - arm-build
       - x86-build
-      - x86-deploy:
-          requires: 
-            - x86-build
