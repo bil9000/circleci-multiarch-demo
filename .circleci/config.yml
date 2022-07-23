@@ -4,25 +4,10 @@ orbs:
   aws-ecs: circleci/aws-ecs@3.0.0
   aws-ecr: circleci/aws-ecr@8.1.2
 
-jobs:
-  arm-build:
-    machine:
-      image: ubuntu-2004:current
-    resource_class: arm.large
-    steps:
-      - checkout
-      - aws-ecr/build-and-push-image:
-          repo: "${AWS_RESOURCE_NAME_PREFIX}"
-          region: ${AWS_DEFAULT_REGION}
-          tag: "arm-${CIRCLE_SHA1}"
-          platform: linux/arm64
-
-  x86-build:
-    machine:
-      image: ubuntu-2004:current
-    resource_class: x86.large
-    steps:
-      - checkout
+workflows:
+  version: 2
+  multi-arch-deploy:
+    jobs:
       - aws-ecr/build-and-push-image:
           repo: "${AWS_RESOURCE_NAME_PREFIX}"
           region: ${AWS_DEFAULT_REGION}
@@ -42,10 +27,3 @@ jobs:
                   ELB_ARN=$(aws elbv2 describe-target-groups --target-group-arns $TARGET_GROUP_ARN | jq -r '.TargetGroups[0].LoadBalancerArns[0]')
                   ELB_DNS_NAME=$(aws elbv2 describe-load-balancers --load-balancer-arns $ELB_ARN | jq -r '.LoadBalancers[0].DNSName')
                   curl -s --retry 10 http://$ELB_DNS_NAME | grep "Welcome to nginx!"
-
-workflows:
-  version: 2
-  multi-arch-deploy:
-    jobs:
-      - arm-build
-      - x86-build
