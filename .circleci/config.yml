@@ -58,4 +58,5 @@ workflows:
       - arm-build
       - x86-build
       - x86-deploy:
-          requires: x86-build
+          requires: 
+            - x86-build
