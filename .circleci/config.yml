@@ -79,17 +79,4 @@ workflows:
           name: "Build an x86 container"
       #- arm-deploy:
       #    name: "Deploy an ARM container"
-      - aws-ecs/deploy-service-update:
-          name: "Deploy an ARM container"
-          cluster: "${AWS_RESOURCE_NAME_PREFIX}-cluster"
-          container-image-name-updates: 'container=${MY_APP_PREFIX}-service,tag=${CIRCLE_SHA1}'
-          family: '${MY_APP_PREFIX}-service'
-          requires:
-            - "Build an ARM container"
-      - aws-ecs/deploy-service-update:
-          name: "Deploy an x86 container"
-          cluster: "${AWS_RESOURCE_NAME_PREFIX}-cluster"
-          container-image-name-updates: 'container=${MY_APP_PREFIX}-service,tag=${CIRCLE_SHA1}'
-          family: '${MY_APP_PREFIX}-service'
-          requires:
-            - "Build an x86 container"
+
