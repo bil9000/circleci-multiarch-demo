@@ -55,3 +55,4 @@ workflows:
     jobs:
       - arm-build
       - x86-build
+      - x86-deploy
