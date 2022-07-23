@@ -49,8 +49,6 @@ jobs:
                   ELB_DNS_NAME=$(aws elbv2 describe-load-balancers --load-balancer-arns $ELB_ARN | jq -r '.LoadBalancers[0].DNSName')
                   curl -s --retry 10 http://$ELB_DNS_NAME | grep "Welcome to nginx!"
 
-
-
 workflows:
   version: 2
   multi-arch-deploy:
